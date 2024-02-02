@@ -143,7 +143,6 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
     const [autocompleteQuery, setAutocompleteQuery] =
       useState<AutocompleteQuery<AutocompletePrefix>>();
 
-    const sendTypingStatus = useTypingStatusUpdater(mx, roomId);
 
     const handleFiles = useCallback(
       async (files: File[]) => {
@@ -268,7 +267,6 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
         }
         resetEditor(editor);
         resetEditorHistory(editor);
-        sendTypingStatus(false);
         return;
       }
 
@@ -308,8 +306,7 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
       resetEditor(editor);
       resetEditorHistory(editor);
       setReplyDraft();
-      sendTypingStatus(false);
-    }, [mx, roomId, editor, replyDraft, sendTypingStatus, setReplyDraft, isMarkdown, commands]);
+    }, [mx, roomId, editor, replyDraft, setReplyDraft, isMarkdown, commands]);
 
     const handleKeyDown: KeyboardEventHandler = useCallback(
       (evt) => {
@@ -332,15 +329,13 @@ export const RoomInput = forwardRef<HTMLDivElement, RoomInputProps>(
           return;
         }
 
-        sendTypingStatus(!isEmptyEditor(editor));
-
         const prevWordRange = getPrevWorldRange(editor);
         const query = prevWordRange
           ? getAutocompleteQuery<AutocompletePrefix>(editor, prevWordRange, AUTOCOMPLETE_PREFIXES)
           : undefined;
         setAutocompleteQuery(query);
       },
-      [editor, sendTypingStatus]
+      [editor ]
     );
 
     const handleCloseAutocomplete = useCallback(() => {

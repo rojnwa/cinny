@@ -1,3 +1,4 @@
+import { ReceiptType } from 'matrix-js-sdk/lib/@types/read_receipts';
 import initMatrix from '../initMatrix';
 
 // eslint-disable-next-line import/prefer-default-export
@@ -22,5 +23,5 @@ export async function markAsRead(roomId) {
   const latestEvent = getLatestValidEvent();
   if (latestEvent === null) return;
 
-  await mx.sendReadReceipt(latestEvent);
+  await mx.sendReadReceipt(latestEvent, ReceiptType.ReadPrivate);
 }

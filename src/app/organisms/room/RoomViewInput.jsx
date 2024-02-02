@@ -36,7 +36,6 @@ import CrossIC from '../../../../public/res/ic/outlined/cross.svg';
 import commands from './commands';
 
 const CMD_REGEX = /(^\/|:|@)(\S*)$/;
-let isTyping = false;
 let isCmdActivated = false;
 let cmdCursorPos = null;
 function RoomViewInput({
@@ -69,16 +68,7 @@ function RoomViewInput({
     };
   }, []);
 
-  const sendIsTyping = (isT) => {
-    mx.sendTyping(roomId, isT, isT ? TYPING_TIMEOUT : undefined);
-    isTyping = isT;
 
-    if (isT === true) {
-      setTimeout(() => {
-        if (isTyping) sendIsTyping(false);
-      }, TYPING_TIMEOUT);
-    }
-  };
 
   function uploadingProgress(myRoomId, { loaded, total }) {
     if (myRoomId !== roomId) return;
@@ -158,7 +148,6 @@ function RoomViewInput({
     viewEvent.on('cmd_fired', firedCmd);
     navigation.on(cons.events.navigation.REPLY_TO_CLICKED, setUpReply);
     if (textAreaRef?.current !== null) {
-      isTyping = false;
       textAreaRef.current.value = roomsInput.getMessage(roomId);
       setAttachment(roomsInput.getAttachment(roomId));
       setReplyTo(roomsInput.getReplyTo(roomId));
@@ -188,7 +177,6 @@ function RoomViewInput({
     if (!opt.msgType) opt.msgType = 'm.text';
     if (typeof opt.autoMarkdown !== 'boolean') opt.autoMarkdown = true;
     if (roomsInput.isSending(roomId)) return;
-    sendIsTyping(false);
 
     roomsInput.setMessage(roomId, body);
     if (attachment !== null) {
@@ -246,17 +234,7 @@ function RoomViewInput({
     roomsInput.sendSticker(roomId, data);
   };
 
-  function processTyping(msg) {
-    const isEmptyMsg = msg === '';
 
-    if (isEmptyMsg && isTyping) {
-      sendIsTyping(false);
-      return;
-    }
-    if (!isEmptyMsg && !isTyping) {
-      sendIsTyping(true);
-    }
-  }
 
   function getCursorPosition() {
     return textAreaRef.current.selectionStart;
@@ -293,9 +271,7 @@ function RoomViewInput({
   }
 
   const handleMsgTyping = (e) => {
-    const msg = e.target.value;
     recognizeCmd(e.target.value);
-    if (!isCmdActivated) processTyping(msg);
   };
 
   const handleKeyDown = (e) => {

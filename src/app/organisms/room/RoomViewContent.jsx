@@ -323,36 +323,12 @@ function useHandleScroll(
 }
 
 function useEventArrive(roomTimeline, readUptoEvtStore, timelineScrollRef, eventLimitRef) {
-  const myUserId = initMatrix.matrixClient.getUserId();
   const [newEvent, setEvent] = useState(null);
 
   useEffect(() => {
     const timelineScroll = timelineScrollRef.current;
     const limit = eventLimitRef.current;
-    const trySendReadReceipt = (event) => {
-      if (myUserId === event.getSender()) {
-        requestAnimationFrame(() => markAsRead(roomTimeline.roomId));
-        return;
-      }
-      const readUpToEvent = readUptoEvtStore.getItem();
-      const readUpToId = roomTimeline.getReadUpToEventId();
-      const isUnread = readUpToEvent ? readUpToEvent?.getId() === readUpToId : true;
 
-      if (isUnread === false) {
-        if (document.visibilityState === 'visible' && timelineScroll.bottom < 16) {
-          requestAnimationFrame(() => markAsRead(roomTimeline.roomId));
-        } else {
-          readUptoEvtStore.setItem(roomTimeline.findEventByIdInTimelineSet(readUpToId));
-        }
-        return;
-      }
-
-      const { timeline } = roomTimeline;
-      const unreadMsgIsLast = timeline[timeline.length - 2].getId() === readUpToId;
-      if (unreadMsgIsLast) {
-        requestAnimationFrame(() => markAsRead(roomTimeline.roomId));
-      }
-    };
 
     const handleEvent = (event) => {
       const tLength = roomTimeline.timeline.length;
@@ -361,7 +337,6 @@ function useEventArrive(roomTimeline, readUptoEvtStore, timelineScrollRef, event
 
       if (isViewingLive && isAttached && document.hasFocus()) {
         limit.setFrom(tLength - limit.maxEvents);
-        trySendReadReceipt(event);
         setEvent(event);
         return;
       }
